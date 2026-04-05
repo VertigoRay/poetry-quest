@@ -285,6 +285,31 @@ const POETRY_TYPES = {
   },
 };
 
+const POETRY_ELEMENTS = {
+  rhyme_scheme: {
+    name: "Rhyme Scheme",
+    definition: "The pattern of rhyming lines in a poem. Common patterns include AABB (first two lines rhyme, next two rhyme) and ABAB (every other line rhymes).",
+    example: "Roses are red, (A)\nViolets are blue, (B)\nSugar is sweet, (A)\nAnd so are you. (B)\n\nThis is ABAB because lines 1 & 3 rhyme, and lines 2 & 4 rhyme.",
+  },
+  imagery: {
+    name: "Imagery",
+    definition: "Words that help you picture something in your mind. They paint a picture using your senses - what you see, hear, feel, smell, or taste.",
+    example: "\"Feathered wings\" helps you imagine soft, delicate bird wings.\n\"The crackling fire warmed her icy fingers\" - you can feel the cold and hear the fire.",
+  },
+  repetition: {
+    name: "Repetition",
+    definition: "Repeating words or phrases in a poem for effect. It can make ideas stronger, create rhythm, or make something memorable.",
+    example: "\"I have a dream\" (repeated by MLK Jr.)\n\"Stop, stop, stop!\" - repeating the word makes it more urgent.",
+  },
+  theme: {
+    name: "Theme",
+    definition: "The lesson or message of the poem. It's the big idea the poet wants you to understand. For example: \"Nobody is perfect.\"",
+    example: "A poem about a kid who makes mistakes but keeps trying might have the theme: \"Never give up\" or \"It's okay to fail.\"",
+  },
+};
+
+const ELEMENT_NAMES = Object.values(POETRY_ELEMENTS).map(e => e.name);
+
 const TYPES = Object.keys(POETRY_TYPES);
 const TYPE_NAMES = TYPES.map(t => POETRY_TYPES[t].name);
 
@@ -376,6 +401,34 @@ function generateQuestions(mode) {
         explanation: null,
       });
     }
+  } else if (mode === "elements") {
+    const elemQs = [
+      { q: "What is a rhyme scheme?", a: "The pattern of rhyming lines", opts: ["The pattern of rhyming lines", "The number of syllables", "The topic of the poem", "The rhythm of the poem"] },
+      { q: "AABB means:", a: "Lines 1 & 2 rhyme, lines 3 & 4 rhyme", opts: ["Lines 1 & 2 rhyme, lines 3 & 4 rhyme", "Every other line rhymes", "No lines rhyme", "All lines rhyme with each other"] },
+      { q: "ABAB means:", a: "Every other line rhymes", opts: ["Lines 1 & 2 rhyme together", "Every other line rhymes", "Only the last two lines rhyme", "Nothing rhymes"] },
+      { q: "What is imagery?", a: "Words that help you picture something", opts: ["Words that rhyme", "Words that help you picture something", "Words that repeat", "The title of the poem"] },
+      { q: "\"Feathered wings\" is an example of:", a: "Imagery", opts: ["Rhyme Scheme", "Imagery", "Repetition", "Theme"] },
+      { q: "\"The golden sun melted into the purple horizon\" is an example of:", a: "Imagery", opts: ["Repetition", "Theme", "Imagery", "Rhyme Scheme"] },
+      { q: "What is repetition in poetry?", a: "Repeating words or phrases", opts: ["Using big words", "Repeating words or phrases", "Writing about nature", "Making lines rhyme"] },
+      { q: "\"Stop, stop, stop!\" is an example of:", a: "Repetition", opts: ["Imagery", "Theme", "Rhyme Scheme", "Repetition"] },
+      { q: "What is the theme of a poem?", a: "The lesson or message", opts: ["The title", "The rhyme pattern", "The lesson or message", "The number of lines"] },
+      { q: "\"Nobody is perfect\" is an example of a poem's:", a: "Theme", opts: ["Rhyme Scheme", "Imagery", "Repetition", "Theme"] },
+      { q: "A poem about a kid who keeps trying after failing might have the theme:", a: "Never give up", opts: ["Cats are cool", "Never give up", "AABB", "Feathered wings"] },
+      { q: "Which element makes you use your senses (see, hear, feel, smell, taste)?", a: "Imagery", opts: ["Theme", "Repetition", "Rhyme Scheme", "Imagery"] },
+      { q: "Which element gives the poem rhythm by saying things more than once?", a: "Repetition", opts: ["Imagery", "Repetition", "Theme", "Rhyme Scheme"] },
+      { q: "In AABB, which lines rhyme with each other?", a: "1 with 2, and 3 with 4", opts: ["1 with 3, and 2 with 4", "1 with 2, and 3 with 4", "1 with 4, and 2 with 3", "None of them"] },
+      { q: "\"The icy wind bit her cheeks\" uses imagery for which sense?", a: "Touch (feeling)", opts: ["Sight", "Sound", "Touch (feeling)", "Taste"] },
+      { q: "\"I can see it, I can see it, I can see it now!\" uses:", a: "Repetition", opts: ["Imagery", "Repetition", "Theme", "Rhyme Scheme"] },
+    ];
+
+    for (const eq of shuffle(elemQs).slice(0, 10)) {
+      questions.push({
+        question: eq.q,
+        answer: eq.a,
+        options: shuffle(eq.opts),
+        explanation: null,
+      });
+    }
   } else if (mode === "match") {
     // Match poem to its type - show short examples
     const examples = [
@@ -440,6 +493,10 @@ function render() {
             Match the Example
             <small>Read a poem and figure out what type it is</small>
           </button>
+          <button class="mode-btn" onclick="startGame('elements')" style="background: linear-gradient(135deg, #e67e22, #e74c3c)">
+            Poetry Elements
+            <small>Rhyme scheme, imagery, repetition, and theme</small>
+          </button>
           <button class="mode-btn" onclick="showStudy()" style="background: linear-gradient(135deg, #28a745, #20c997)">
             Study Guide
             <small>Review all 8 poetry types before you play</small>
@@ -448,7 +505,7 @@ function render() {
       </div>
     `;
   } else if (state.screen === "study") {
-    let cards = "";
+    let cards = '<h3 style="margin-bottom:8px;color:#764ba2">Poetry Types</h3>';
     for (const key of TYPES) {
       const t = POETRY_TYPES[key];
       cards += `
@@ -459,6 +516,17 @@ function render() {
           ${t.syllables ? `<p><strong>Syllables:</strong> ${t.syllables}</p>` : ""}
           ${t.rhyme && t.rhyme !== "none" ? `<p><strong>Rhyme:</strong> ${t.rhyme}</p>` : ""}
           ${t.example ? `<div class="example">${t.example}</div>` : ""}
+        </div>
+      `;
+    }
+    cards += '<h3 style="margin:16px 0 8px;color:#e67e22">Poetry Elements</h3>';
+    for (const key of Object.keys(POETRY_ELEMENTS)) {
+      const e = POETRY_ELEMENTS[key];
+      cards += `
+        <div class="study-card" style="border-left:3px solid #e67e22">
+          <h3 style="color:#e67e22">${e.name}</h3>
+          <p>${e.definition}</p>
+          <div class="example">${e.example}</div>
         </div>
       `;
     }

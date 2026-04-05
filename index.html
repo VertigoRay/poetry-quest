@@ -541,8 +541,8 @@ function render() {
     const starStr = Array(state.score).fill("\u2B50").join("");
 
     let optionsHtml = "";
-    for (const opt of q.options) {
-      optionsHtml += `<button class="option" onclick="answer('${opt.replace(/'/g, "\\'")}')">${opt}</button>`;
+    for (let i = 0; i < q.options.length; i++) {
+      optionsHtml += `<button class="option" data-idx="${i}">${q.options[i]}</button>`;
     }
 
     app.innerHTML = `
@@ -556,11 +556,17 @@ function render() {
         <div class="question">${q.question}</div>
         ${q.poem ? `<div class="poem-example">${q.poem}</div>` : ""}
         ${q.hint ? `<div class="hint">${q.hint}</div>` : ""}
-        <div class="options">${optionsHtml}</div>
+        <div class="options" id="options">${optionsHtml}</div>
         <div class="feedback" id="feedback"></div>
         <button class="next-btn" id="next-btn" onclick="nextQuestion()">Next Question</button>
       </div>
     `;
+    document.getElementById("options").addEventListener("click", function(e) {
+      const btn = e.target.closest(".option");
+      if (!btn) return;
+      const idx = parseInt(btn.dataset.idx);
+      answer(state.questions[state.current].options[idx]);
+    });
   } else if (state.screen === "results") {
     const pct = Math.round((state.score / state.questions.length) * 100);
     let msg, emoji;
